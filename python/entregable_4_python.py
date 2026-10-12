@@ -1,6 +1,5 @@
 import os
 
-
 class programaAcademico:
     def __init__(self, nombre, duracion):
         self.nombredePrograma = nombre
@@ -20,7 +19,7 @@ class curso(programaAcademico):
         super().__init__("Curso", "Corto")
 
     def verificar_aprobacion(self, alumno):
-        if not alumno.notas:
+        if len(alumno.notas) < 3:
             return False
         promedio = sum(alumno.notas) / len(alumno.notas)
         return promedio >= 10.0
@@ -30,7 +29,7 @@ class diplomado(programaAcademico):
         super().__init__("Diplomado", "Mediano")
 
     def verificar_aprobacion(self, alumno):
-        if not alumno.notas:
+        if len(alumno.notas) < 3:
             return False
         promedio = sum(alumno.notas) / len(alumno.notas)
         return promedio >= 14.0
@@ -40,7 +39,7 @@ class bootcamp(programaAcademico):
         super().__init__("Bootcamp", "Intensivo")
 
     def verificar_aprobacion(self, alumno):
-        if not alumno.notas:
+        if len(alumno.notas) < 3:
             return False
         for nota in alumno.notas:
             if nota < 14.0:
@@ -80,7 +79,6 @@ class alumno(persona):
     def agregar_nota(self, nota):
         self.notas.append(nota)
 
-
     def calcular_promedio(self):
         if not self.notas:
             return 0.0
@@ -105,7 +103,6 @@ class profesor(persona):
         alumno_obj.agregar_nota(nota)
 
 
-
 class sistema:
     def __init__(self):
         self.lista_alumnos = []
@@ -119,14 +116,19 @@ class sistema:
             try:
                 with open("alumnos.txt", "r", encoding="utf-8") as f:
                     for linea in f:
+                        if not linea.strip():
+                            continue
                         partes = [p.strip() for p in linea.split(",")]
                         if len(partes) >= 4:
                             cedula, nombre, correo, tipo_prog = partes[0], partes[1], partes[2], partes[3]
                             alu = alumno(cedula, nombre, correo, tipo_prog)
+                            # Lee todas las notas disponibles a partir del índice 4
                             for nota_str in partes[4:]:
                                 if nota_str:
                                     try:
-                                        alu.agregar_nota(float(nota_str))
+                                        val_nota = float(nota_str)
+                                        if 0.0 <= val_nota <= 20.0:
+                                            alu.agregar_nota(val_nota)
                                     except ValueError:
                                         pass
                             self.lista_alumnos.append(alu)
@@ -137,6 +139,8 @@ class sistema:
             try:
                 with open("profesores.txt", "r", encoding="utf-8") as f:
                     for linea in f:
+                        if not linea.strip():
+                            continue
                         partes = [p.strip() for p in linea.split(",")]
                         if len(partes) >= 5:
                             cedula, nombre, correo, esp, mat = partes[0], partes[1], partes[2], partes[3], partes[4]
@@ -146,39 +150,57 @@ class sistema:
                 print(f"Error al leer profesores.txt: {e}")
 
     def guardar_alumnos_en_disco(self):
-        if self.lista_alumnos:
-            with open("alumnos.txt", "w", encoding="utf-8") as f:
-                for alu in self.lista_alumnos:
-                    notas_str = ",".join([str(n) for n in alu.notas]) if alu.notas else "0,0,0"
-                    f.write(f"{alu.cedula}, {alu.nombre_completo}, {alu.correo}, {alu.programa_asignado.nombredePrograma}, {notas_str}\n")
+        with open("alumnos.txt", "w", encoding="utf-8") as f:
+            for alu in self.lista_alumnos:
+                if alu.notas:
+                    notas_str = ",".join([str(n) for n in alu.notas])
+                    f.write(f"{alu.cedula},{alu.nombre_completo},{alu.correo},{alu.programa_asignado.nombredePrograma},{notas_str}\n")
+                else:
+                    f.write(f"{alu.cedula},{alu.nombre_completo},{alu.correo},{alu.programa_asignado.nombredePrograma}\n")
 
     def guardar_profesores_en_disco(self):
-        if self.lista_profesores:
-            with open("profesores.txt", "w", encoding="utf-8") as f:
-                for prof in self.lista_profesores:
-                    f.write(f"{prof.cedula}, {prof.nombre_completo}, {prof.correo}, {prof.especialidad_academica}, {prof.materia}\n")
+        with open("profesores.txt", "w", encoding="utf-8") as f:
+            for prof in self.lista_profesores:
+                f.write(f"{prof.cedula},{prof.nombre_completo},{prof.correo},{prof.especialidad_academica},{prof.materia}\n")
 
     def registrar_alumno(self, alu):
+        for existente in self.lista_alumnos:
+            if existente.cedula.strip().upper() == alu.cedula.strip().upper():
+                print(f"\nError: Ya existe un alumno registrado con la cédula '{alu.cedula}'.")
+                return False
+
         self.lista_alumnos.append(alu)
         self.guardar_alumnos_en_disco()
         print(f"\n¡Alumno {alu.nombre_completo} registrado con éxito!")
+        return True
 
     def registrar_profesor(self, prof):
+        for existente in self.lista_profesores:
+            if existente.cedula.strip().upper() == prof.cedula.strip().upper():
+                print(f"\nError: Ya existe un profesor registrado con la cédula '{prof.cedula}'.")
+                return False
+
         self.lista_profesores.append(prof)
         self.guardar_profesores_en_disco()
         print(f"\n¡Profesor {prof.nombre_completo} registrado con éxito!")
+        return True
 
     def registrar_notas(self, cedula, nota):
+        if not (0.0 <= nota <= 20.0):
+            print(f"Error: Nota no válida ({nota}). La calificación tiene que ser del 0 al 20.")
+            return False
+
         for alu in self.lista_alumnos:
             if alu.cedula.strip().upper() == cedula.strip().upper():
                 if len(alu.notas) >= 3:
-                    print("Error: El alumno ya alcanzó el límite máximo de 3 notas.")
+                    print(f"Error: El alumno {alu.nombre_completo} ya ha llenado las 3 notas permitidas.")
                     return False
                 alu.agregar_nota(nota)
                 self.pila_acciones_notas.append(alu.cedula)
                 self.guardar_alumnos_en_disco()
                 print(f"¡Nota {nota} agregada correctamente a {alu.nombre_completo}!")
                 return True
+                
         print("Error: No se encontró ningún alumno registrado con esa cédula.")
         return False
 
@@ -188,17 +210,19 @@ class sistema:
             return
         cedula_afectada = self.pila_acciones_notas.pop()
         for alu in self.lista_alumnos:
-            if alu.cedula == cedula_afectada:
+            if alu.cedula.strip().upper() == cedula_afectada.strip().upper():
                 if alu.notas:
                     nota_removida = alu.notas.pop()
                     self.guardar_alumnos_en_disco()
                     print(f"\n[Deshacer LIFO]: Se eliminó la última nota ({nota_removida}) de {alu.nombre_completo}.")
+                else:
+                    print(f"\nEl alumno {alu.nombre_completo} ya no tiene notas para remover.")
                 return
 
     def generar_cola_certificados(self):
         graduandos = []
         for alu in self.lista_alumnos:
-            if alu.programa_asignado.verificar_aprobacion(alu):
+            if len(alu.notas) == 3 and alu.programa_asignado.verificar_aprobacion(alu):
                 graduandos.append(alu)
 
         self.certificaciones = graduandos
@@ -214,7 +238,7 @@ class sistema:
                 f.write(f"- Programa: {grad.programa_asignado.nombredePrograma}\n")
                 f.write(f"- Promedio Final: {prom:.1f}\n")
                 f.write(f"- Estatus: APROBADO{estatus_extra}\n")
-            f.write("=========================================\n* Fin del reporte *\n")
+            f.write("=========================================\nFin del reporte\n")
         print("\n¡Cola de certificados generada con éxito en 'certificados_pendientes.txt'!")
 
     def generar_reporte(self):
@@ -276,7 +300,7 @@ def main():
 
         elif opcion_int == 2:
             print("\n--- REGISTRAR PROFESOR ---")
-            cedula = input("Ingrese Cédula/ID: ").strip()
+            cedula = input("Ingrese Cédula/ID (Ej. V-999): ").strip()
             nombre = input("Ingrese Nombre Completo: ").strip()
             correo = input("Ingrese Correo Electrónico: ").strip()
             especialidad = input("Ingrese Especialidad Académica: ").strip()
@@ -286,7 +310,7 @@ def main():
 
         elif opcion_int == 3:
             print("\n--- REGISTRAR NOTAS A UN ALUMNO ---")
-            cedula = input("Ingrese Cédula del Alumno: ").strip()
+            cedula = input("Ingrese Cédula del Alumno (Ej. V-999): ").strip()
             try:
                 nota = float(input("Ingrese la calificación (0-20): "))
                 s.registrar_notas(cedula, nota)
