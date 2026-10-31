@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-
 abstract class ProgramaAcademico {
     protected String nombreDePrograma;
     protected String duracion;
@@ -78,7 +77,6 @@ class Bootcamp extends ProgramaAcademico {
         return true;
     }
 }
-
 
 class Persona {
     protected String cedula;
@@ -157,13 +155,12 @@ class Profesor extends Persona {
     }
 }
 
-
-class GestorLogica {
+public class Sistema {
     private List<Alumno> listaAlumnos;
     private List<Profesor> listaProfesores;
     private Stack<String> pilaAccionesNotas;
 
-    public GestorLogica() {
+    public Sistema() {
         this.listaAlumnos = new ArrayList<>();
         this.listaProfesores = new ArrayList<>();
         this.pilaAccionesNotas = new Stack<>();
@@ -389,13 +386,10 @@ class GestorLogica {
         }
         System.out.println("=========================================\n");
     }
-}
 
-
-public class Sistema {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        GestorLogica sistema = new GestorLogica();
+        Sistema sistema = new Sistema();
 
         while (true) {
             System.out.println("\n=========================================");
@@ -488,9 +482,10 @@ public class Sistema {
                     return;
 
                 default:
-                    System.out.println("Opción inválida. Seleccione un número entre 1 y 7.");
+                    System.out.println("Opción inválida. Seleccione un número entre 1 y `7`.");
                     break;
             }
         }
     }
 }
+
