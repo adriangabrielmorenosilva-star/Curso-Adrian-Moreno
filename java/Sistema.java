@@ -106,7 +106,8 @@ class Alumno extends Persona {
     public Alumno(String cedula, String nombreCompleto, String correo, String tipoPrograma) {
         super(cedula, nombreCompleto, correo);
         this.notas = new ArrayList<>();
-        String tipoLower = tipoPrograma.toLowerCase();
+        String tipoLower = tipoPrograma.toLowerCase().trim();
+        
         if (tipoLower.contains("curso")) {
             this.programaAsignado = new Curso();
         } else if (tipoLower.contains("diplomado")) {
@@ -114,7 +115,7 @@ class Alumno extends Persona {
         } else if (tipoLower.contains("bootcamp")) {
             this.programaAsignado = new Bootcamp();
         } else {
-            this.programaAsignado = new Curso();
+            throw new IllegalArgumentException("Tipo de programa inválido: '" + tipoPrograma + "'. Debe ser Curso, Diplomado o Bootcamp.");
         }
     }
 
@@ -183,20 +184,23 @@ public class Sistema {
                         String nombre = partes[1];
                         String correo = partes[2];
                         String tipoProg = partes[3];
-                        Alumno alu = new Alumno(cedula, nombre, correo, tipoProg);
-                        for (int i = 4; i < partes.length; i++) {
-                            if (!partes[i].isEmpty()) {
-                                try {
-                                    double valNota = Double.parseDouble(partes[i]);
-                                    if (valNota >= 0.0 && valNota <= 20.0) {
-                                        alu.agregarNota(valNota);
+                        try {
+                            Alumno alu = new Alumno(cedula, nombre, correo, tipoProg);
+                            for (int i = 4; i < partes.length; i++) {
+                                if (!partes[i].isEmpty()) {
+                                    try {
+                                        double valNota = Double.parseDouble(partes[i]);
+                                        if (valNota >= 0.0 && valNota <= 20.0) {
+                                            alu.agregarNota(valNota);
+                                        }
+                                    } catch (NumberFormatException e) {
                                     }
-                                } catch (NumberFormatException e) {
-                                    // Ignorar valores mal formateados
                                 }
                             }
+                            listaAlumnos.add(alu);
+                        } catch (IllegalArgumentException e) {
+                            System.out.println("Aviso: Alumno omitido por programa inválido en archivo: " + e.getMessage());
                         }
-                        listaAlumnos.add(alu);
                     }
                 }
             } catch (IOException e) {
@@ -258,26 +262,26 @@ public class Sistema {
     public boolean registrarAlumno(Alumno alu) {
         for (Alumno existente : listaAlumnos) {
             if (existente.getCedula().trim().equalsIgnoreCase(alu.getCedula().trim())) {
-                System.out.println("\nError: Ya existe un alumno registrado con la cédula '" + alu.getCedula() + "'.");
+                System.out.println("\nError: Ya existe un alumno registrado con la cédula '" + alu.getCedula() + "'. Registro anulado.");
                 return false;
             }
         }
         listaAlumnos.add(alu);
         guardarAlumnosEnDisco();
-        System.out.println("\n¡Alumno " + alu.getNombreCompleto() + " registrado con éxito!");
+        System.out.println("\n¡Alumno " + alu.getNombreCompleto() + " registrado con éxito y guardado en disco!");
         return true;
     }
 
     public boolean registrarProfesor(Profesor prof) {
         for (Profesor existente : listaProfesores) {
             if (existente.getCedula().trim().equalsIgnoreCase(prof.getCedula().trim())) {
-                System.out.println("\nError: Ya existe un profesor registrado con la cédula '" + prof.getCedula() + "'.");
+                System.out.println("\nError: Ya existe un profesor registrado con la cédula '" + prof.getCedula() + "'. Registro anulado.");
                 return false;
             }
         }
         listaProfesores.add(prof);
         guardarProfesoresEnDisco();
-        System.out.println("\n¡Profesor " + prof.getNombreCompleto() + " registrado con éxito!");
+        System.out.println("\n¡Profesor " + prof.getNombreCompleto() + " registrado con éxito y guardado en disco!");
         return true;
     }
 
@@ -429,8 +433,14 @@ public class Sistema {
                     String correoAlu = scanner.nextLine().trim();
                     System.out.print("Ingrese Tipo de Programa (Curso, Diplomado, Bootcamp): ");
                     String tipoProg = scanner.nextLine().trim();
-                    Alumno nuevoAlumno = new Alumno(cedulaAlu, nombreAlu, correoAlu, tipoProg);
-                    sistema.registrarAlumno(nuevoAlumno);
+                    
+                    try {
+                        Alumno nuevoAlumno = new Alumno(cedulaAlu, nombreAlu, correoAlu, tipoProg);
+                        sistema.registrarAlumno(nuevoAlumno);
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("\n[Error de Registro]: " + e.getMessage());
+                        System.out.println(">>> La opción ingresada no es válida. El registro del alumno ha sido anulado. <<<");
+                    }
                     break;
 
                 case 2:
@@ -482,10 +492,9 @@ public class Sistema {
                     return;
 
                 default:
-                    System.out.println("Opción inválida. Seleccione un número entre 1 y `7`.");
+                    System.out.println("Opción inválida. Seleccione un número entre 1 y 7.");
                     break;
             }
         }
     }
 }
-

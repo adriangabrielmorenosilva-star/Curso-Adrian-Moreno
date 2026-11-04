@@ -1,1 +1,1 @@
-V-606,Pedro Infante,pedro@gmail.com,CSS,CSS
+V-505,Pedro Infante,pedr@gmail.com,Frontend,Frontend

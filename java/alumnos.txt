@@ -1,6 +1,5 @@
-V-101,Ana Silva,Ana@gmail.com,Curso,10.0,10.0,10.0
-V-202,Carlos Perez,Carlos@gmail.com,Diplomado,14.0,14.0,13.0
-V-303,Maria Gomez,Maria@gmail.com,Bootcamp,20.0,20.0,13.0
-V-404,Luis Rojas,Luis@gmail.com,Bootcamp,14.0,15.0,14.0
-V-505,Veronica Silva,Vero@gmail.com,Curso,20.0,20.0,20.0
-V-758,Adrian Moreno,adri@gmail.com,Diplomado
+V-101,Ana Silva,ana@gmail.com,Curso,10.0,10.0,10.0
+V-202,Carlos Perez,carlos@gmail.com,Diplomado,14.0,14.0,13.0
+V-303,Maria Gomez,maria@gmail.com,Bootcamp,20.0,20.0,13.0
+V-404,Luis Rojas,luis@gmail.com,Bootcamp,14.0,14.0,15.0
+V-606,Veronica Silva,vero@gmail.com,Curso
