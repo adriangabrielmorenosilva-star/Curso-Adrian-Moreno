@@ -466,7 +466,7 @@ public:
                 
                 const vector<double>& notas = a->getNotas();
                 for (size_t i = 0; i < notas.size(); ++i) {
-                    // Muestra cada nota con 1 decimal exacto (ej. 20.0)
+                    
                     cout << fixed << setprecision(1) << notas[i] << (i < notas.size() - 1 ? ", " : "");
                 }
                 cout << "] | Prom: " << fixed << setprecision(1) << prom << " | Estatus: " << estatus << endl;
