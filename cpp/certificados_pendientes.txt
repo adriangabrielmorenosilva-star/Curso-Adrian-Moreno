@@ -1,0 +1,10 @@
+===
+REPORTE DE CERTIFICADOS PENDIENTES
+=========================================
+Total de graduandos en cola: 1
+1. [V-101] Ana Silva
+- Programa: Curso
+- Promedio Final: 10.0
+- Estatus: APROBADO
+=========================================
+* Fin del reporte - Generado por SGA-DO *
